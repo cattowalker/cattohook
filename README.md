@@ -1,6 +1,6 @@
 ## cattohook : supported games
 ```ini
-[Vectus] :
+[Working] [Vectus] :
   [-] Infinite Stamina.
   [-] No dash cooldown.
   [-] No fall damage.
