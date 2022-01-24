@@ -13,6 +13,10 @@
   [-] Workbench (crafts but instant).
   [-] Autofarm (XP, items autofarm).
 ```
+## cattohook : script
+```lua
+-- not done
+```
 ## cattohook : links
 Discord : `https://discord.gg/qNxCUCzNfn`
 ## cattohook : credits
