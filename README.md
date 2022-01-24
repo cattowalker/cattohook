@@ -13,4 +13,10 @@
   [-] Workbench (crafts but instant).
   [-] Autofarm (XP, items autofarm).
 ```
-##
+## cattohook : links
+Discord : `https://discord.gg/qNxCUCzNfn`
+## cattohook : credits
+```ini
+# Belkworks : Libraries
+# Spoorloos : UI Library
+# Hydroxide : Perfect Remote Spy :)
