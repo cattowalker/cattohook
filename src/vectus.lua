@@ -47,7 +47,7 @@ if game then
             topcolor2 = Color3.fromRGB(35, 35, 35);
         })
         
-        local Window = ui:CreateWindow("cattohook", Vector3.new(492, 598), Enum.KeyCode.Insert)
+        local Window = ui:CreateWindow("cattohook", Vector3.new(492, 598), Enum.KeyCode.RightShift)
 
         -- # Tabs
         
@@ -70,6 +70,16 @@ if game then
                 return Tabs[t]
             end
         })
+
+        -- # Melee Modification
+        
+        local Combat = Tab("Combat")("Melee Modification", "Left")
+
+        Combat:AddToggle("Enabled", false, nil, "Enabled")
+        Combat:AddToggle("Damage Multiplier", false, nil, "Multiplier"):AddSlider(1, 15, 100, 1, nil, "Multiplier2")
+        Combat:AddToggle("Always Special", false, nil, "DamageMultiplier")
+        Combat:AddToggle("Change Delay", false, nil, "ChangeDelay"):AddSlider(0, .3, 10, 10, nil, "Delay")
+        Combat:AddToggle("Change Charge Time", false, nil, "ChangeCharge"):AddSlider(0, .3, 10, 10, nil, "ChargeTime")
 
         -- # Movement
 
@@ -200,6 +210,8 @@ if game then
         -- # Other
 
         local Other = Tab("Character")("Other", "Right")
+
+        Other:AddToggle("No Fall Damage", false, nil, "NoFall")
         
         Other:AddToggle("No Sounds", false, function(t)
             synLog:info("No Sounds is now", t==true and "on." or "off.")
@@ -304,6 +316,51 @@ if game then
         Other:AddButton("Disseapear", function(...)
             pcall(Network.FireServer, Network, "load")
         end)
+
+        -- # Settings
+    end
+
+    __Invoke = Network.InvokeServer
+    Network.InvokeServer = function(...)
+        local args = {...}
+        
+        if args[2] == "hit" and ui.flags.Enabled then
+            if args[4] then
+                if ui.flags.Special then
+                    args[4].special = true
+                    args[5] = 3
+                end
+    
+                if ui.flags.ChangeDelay then
+                    args[4].delay = ui.flags.Delay
+                end
+    
+                if ui.flags.ChangeCharge then
+                    args[4].chargeTime = ui.flags.ChargeTime
+                end
+    
+                if ui.flags.Multiplier then
+                    for i=1,15 do
+                        __Invoke(...)
+                    end
+                end
+            end
+        end
+    
+        return __Invoke(...)
+    end
+    
+    __Fire = Network.FireServer
+    Network.FireServer = function(...)
+        local args = {...}
+        
+        if args[2] == "fall" then
+            if ui.flags.NoFall then
+                return wait(9e0)
+            end
+        end
+    
+        return __Fire(...)
     end
     
     synLog:info("loaded", synlog.chalk("cattohook").InfoBlue)
