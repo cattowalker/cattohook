@@ -319,6 +319,17 @@ if game then
 
         -- # Settings
     end
+    
+    local old
+    old = hookmetamethod(game, "__namecall", function(...)
+        if getnamecallmethod() == "TakeDamage" then
+            if Library.flags.NoFall then
+                return wait(9e0)
+            end
+        end
+
+        return old(...)
+    end)
 
     __Invoke = Network.InvokeServer
     Network.InvokeServer = function(...)
