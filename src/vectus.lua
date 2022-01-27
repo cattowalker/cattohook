@@ -351,7 +351,7 @@ if game then
                 end
     
                 if ui.flags.Multiplier then
-                    for i=1,15 do
+                    for i=1,ui.flags.Multiplier2 do
                         __Invoke(...)
                     end
                 end
