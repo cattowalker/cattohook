@@ -102,7 +102,7 @@ if game then
                         if Essentials and ClientController and getsenv(ClientController).block_main then
                             local senv = getsenv(ClientController)
                             if debug.getupvalue(senv.block_main, 4) then
-                                debug.setupvalue(senv.block_main, 4, 50)
+                                debug.setupvalue(senv.block_main, 4, math.random(35, 50)
                             end
                         end
                     end
