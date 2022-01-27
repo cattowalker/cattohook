@@ -39,6 +39,86 @@ if game then
     assert(hookmetamethod, "hookmetamethod is nil, exploit is not supported.")
     assert(getsenv, "getsenv is nil, exploit is not supported.")
     assert(getgenv, "getgenv is nil, exploit is not supported.")
+
+    -- # GetClosest
+
+    local function getClosestTool(distance)
+        if not Client or not Client["Character"] then return end
+    
+        local Path = workspace:WaitForChild("Terrain"):WaitForChild("Ignore").Tools
+        
+        for i,v in pairs(Path:GetChildren()) do
+            if v:IsA("Model") and v.PrimaryPart then
+                local magnitude = (v.PrimaryPart.Position-Client.Character.HumanoidRootPart.Position).Magnitude
+                if magnitude <= distance then
+                    return v
+                end
+            end
+        end
+        
+        return nil
+    end
+    
+    local function getClosestDoor(distance)
+        if not Client or not Client["Character"] then return end
+    
+        local Path = game:GetService("Workspace").Doors
+        
+        for i,v in pairs(Path:GetChildren()) do
+            if v:IsA("Model") and v.PrimaryPart then
+                local magnitude = (v.PrimaryPart.Position-Client.Character.HumanoidRootPart.Position).Magnitude
+                if magnitude <= distance then
+                    return v
+                end
+            end
+        end
+        
+        return nil
+    end
+    
+    local function getClosestItem(distance)
+        if not Client or not Client["Character"] then return end
+    
+        local Path = game:GetService("Workspace").Terrain.Ignore.Items
+        
+        for i,v in pairs(Path:GetChildren()) do
+            if v:IsA("Model") and v.PrimaryPart then
+                local magnitude = (v.PrimaryPart.Position-Client.Character.HumanoidRootPart.Position).Magnitude
+                if magnitude <= distance then
+                    return v
+                end
+            elseif v:IsA("MeshPart") or v:IsA("Part") then
+                local magnitude = (v.Position-Client.Character.HumanoidRootPart.Position).Magnitude
+                if magnitude <= distance then
+                    return v
+                end
+            end
+        end
+        
+        return nil
+    end
+    
+    local function getClosestCharacter(distance)
+        if not Client or not Client["Character"] then return end
+        
+        primaryPart = Client["Character"].PrimaryPart
+        maxDistance = distance or math.huge
+    
+        for i,v in pairs(Players:GetPlayers()) do
+            if v ~= Client and v.Character then
+                if v.Character.PrimaryPart then
+                    local magnitude = ((v.Character.PrimaryPart.Position)-(primaryPart.Position)).Magnitude
+                    if magnitude <= maxDistance then
+                        return v.Character
+                    end
+                end
+            end
+        end
+        
+        return nil
+    end
+
+    -- # UI
     
     if Client and ui then
         quick.merge(ui.theme, {
@@ -83,7 +163,7 @@ if game then
 
         -- # Movement
 
-        local Movement = Tab("Character")("Movement", "Left")
+        local Movement = Tab("Player")("Movement", "Left")
 
         Movement:AddToggle("Infinite Stamina", false, function(t)
             synLog:info("Infinite-Stamina is now", t==true and "on." or "off.")
@@ -102,7 +182,7 @@ if game then
                         if Essentials and ClientController and getsenv(ClientController).block_main then
                             local senv = getsenv(ClientController)
                             if debug.getupvalue(senv.block_main, 4) then
-                                debug.setupvalue(senv.block_main, 4, math.random(35, 50)
+                                debug.setupvalue(senv.block_main, 4, math.random(35, 50))
                             end
                         end
                     end
@@ -209,7 +289,7 @@ if game then
 
         -- # Other
 
-        local Other = Tab("Character")("Other", "Right")
+        local Other = Tab("Player")("Other", "Right")
 
         Other:AddToggle("No Fall Damage", false, nil, "NoFall")
         
@@ -317,6 +397,46 @@ if game then
             pcall(Network.FireServer, Network, "load")
         end)
 
+        -- # AutoFarm
+
+        local AutoFarm = Tab("Player")("AutoFarm", "Left")
+
+        AutoFarm:AddToggle("Auto Pick Tools", false, function(t)
+            if(t==(true))then
+                ToolLoop = game.RunService.RenderStepped:Connect(function()
+                    if getClosestTool(15) then
+                        Network:InvokeServer("collectTool", getClosestTool(15))
+                    end
+                end)
+            elseif(not(t)and(ToolLoop))then
+                ToolLoop:Disconnect()
+            end
+        end, "AutoPickTools")
+        
+        AutoFarm:AddToggle("Auto Break Doors", false, function(t)
+            if(t==(true))then
+                DoorLoop = game.RunService.RenderStepped:Connect(function()
+                    if getClosestDoor(15) then
+                        Network:InvokeServer("break door", getClosestDoor(15))
+                    end
+                end)
+            elseif(not(t)and(DoorLoop))then
+                DoorLoop:Disconnect()
+            end
+        end, "AutoBreakDoor")
+        
+        AutoFarm:AddToggle("Auto Pick Items", false, function(t)
+            if(t==(true))then
+                ItemLoop = game.RunService.RenderStepped:Connect(function()
+                    if getClosestItem(15) then
+                        Network:InvokeServer("collectItem", getClosestItem(15))
+                    end
+                end)
+            elseif(not(t)and(ItemLoop))then
+                ItemLoop:Disconnect()
+            end
+        end, "AutoPickItems")
+
         -- # Settings
     end
     
@@ -351,7 +471,7 @@ if game then
                 end
     
                 if ui.flags.Multiplier then
-                    for i=1,ui.flags.Multiplier2 do
+                    for i=1,15 do
                         __Invoke(...)
                     end
                 end
