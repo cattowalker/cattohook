@@ -436,6 +436,55 @@ if game then
                 ItemLoop:Disconnect()
             end
         end, "AutoPickItems")
+        
+        AutoFarm:AddToggle("Auto Open Lockers", false, function(t)
+            if(t==(true))then
+                local function interactlocker(l)
+                    Network:InvokeServer("loot i)-interact", l)
+                end
+        
+                local function lockermain(l)
+                    if not l:FindFirstChild("__cooldown") then
+                        pcall(interactlocker, l)
+                    end
+                    
+                    l.ChildRemoved:Connect(function()
+                        pcall(function()
+                            if Library.flags.AutoOpenLockers then
+                                pcall(interactlocker, l)
+                            end
+                        end)
+                    end)
+                end
+        
+                task.spawn(function()
+                    for i,v in pairs(game:GetService("Workspace").Terrain.Ignore.Supplies:GetChildren()) do
+                        task.spawn(function()
+                            lockermain(v)
+                        end)
+                        task.wait(.1)
+                    end
+                end)
+                
+                task.spawn(function()
+                    for i,v in pairs(game:GetService("Workspace").Terrain.Ignore.Loot:GetChildren()) do
+                        task.spawn(function()
+                            lockermain(v)
+                        end)
+                        task.wait(.1)
+                    end
+                end)
+                
+                task.spawn(function()
+                    for i,v in pairs(game:GetService("Workspace").Terrain.Ignore.Lockers:GetChildren()) do
+                        task.spawn(function()
+                            lockermain(v)
+                        end)
+                        task.wait(.1)
+                    end
+                end)
+            end
+        end, "AutoOpenLockers")
 
         -- # Settings
     end
@@ -443,7 +492,7 @@ if game then
     local old
     old = hookmetamethod(game, "__namecall", function(...)
         if getnamecallmethod() == "TakeDamage" then
-            if Library.flags.NoFall then
+            if ui.flags.NoFall then
                 return wait(9e0)
             end
         end
@@ -471,8 +520,14 @@ if game then
                 end
     
                 if ui.flags.Multiplier then
-                    for i=1,15 do
-                        __Invoke(...)
+                    for i=1,ui.flags.Multiplier2 or 15 and Client.Character do
+                        local args = {...}
+
+                        if type(args[3]) == "table" and args[3][2].Health and args[3][2].Health > 15 and args[3][2].Health ~= 0 then
+                            Client.Character:FindFirstChildOfClass("Tool"):Activate()
+                            Network:FireServer("Swing")
+                            __Invoke(...)
+                        end
                     end
                 end
             end
