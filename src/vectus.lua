@@ -436,55 +436,6 @@ if game then
                 ItemLoop:Disconnect()
             end
         end, "AutoPickItems")
-        
-        AutoFarm:AddToggle("Auto Open Lockers", false, function(t)
-            if(t==(true))then
-                local function interactlocker(l)
-                    Network:InvokeServer("loot i)-interact", l)
-                end
-        
-                local function lockermain(l)
-                    if not l:FindFirstChild("__cooldown") then
-                        pcall(interactlocker, l)
-                    end
-                    
-                    l.ChildRemoved:Connect(function()
-                        pcall(function()
-                            if Library.flags.AutoOpenLockers then
-                                pcall(interactlocker, l)
-                            end
-                        end)
-                    end)
-                end
-        
-                task.spawn(function()
-                    for i,v in pairs(game:GetService("Workspace").Terrain.Ignore.Supplies:GetChildren()) do
-                        task.spawn(function()
-                            lockermain(v)
-                        end)
-                        task.wait(.1)
-                    end
-                end)
-                
-                task.spawn(function()
-                    for i,v in pairs(game:GetService("Workspace").Terrain.Ignore.Loot:GetChildren()) do
-                        task.spawn(function()
-                            lockermain(v)
-                        end)
-                        task.wait(.1)
-                    end
-                end)
-                
-                task.spawn(function()
-                    for i,v in pairs(game:GetService("Workspace").Terrain.Ignore.Lockers:GetChildren()) do
-                        task.spawn(function()
-                            lockermain(v)
-                        end)
-                        task.wait(.1)
-                    end
-                end)
-            end
-        end, "AutoOpenLockers")
 
         -- # Settings
     end
